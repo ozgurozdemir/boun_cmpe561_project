@@ -1,3 +1,4 @@
+import json
 import re
 
 class TurkishStemmer:
@@ -31,13 +32,14 @@ class TurkishStemmer:
             return rules
 
         with open(self.grammar_path, encoding="utf8") as file:
-            self.grammar = json.load(file)
+            grammar = json.load(file)
         
         # reading suffixes
         _suffixes = []
         for rule in grammar:
+            
             # deciding to include derivational suffixes
-            if rule is "Derivational" 
+            if rule is "Derivational": 
                 if self.use_derivational:
                     _suffixes += grammar[rule]
             else:
@@ -52,7 +54,7 @@ class TurkishStemmer:
 
         suffixes = {l: [] for l in range(1, self.max_suffix_len + 1)}
         
-        for suffix in _sufxs:
+        for suffix in _suffixes:
             suffixes[len(suffix)].append(suffix) 
             
         # preparing suffix regexes

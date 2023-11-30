@@ -64,7 +64,7 @@ class TurkishNormalizer:
         E2 = [[*context, e2] for e2 in E2]
         
         # searching possible candidates in the language model
-        cands = {tuple(var): nm.lang_models[2].get(tuple(var)) for var in E1 or E2}
+        cands = {tuple(var): self.lang_models[2].get(tuple(var)) for var in E1 or E2}
         cands = {c: cands[c] for c in cands if cands[c] is not None}
         cands = sorted(cands.items(), key=lambda i: i[1], reverse=True)
         
@@ -89,10 +89,6 @@ class TurkishNormalizer:
                     if candidate != sentence[i]:
                         break
 
-                # if higher ngrams are not found then check unigram
-                if candidate == sentence[i]:
-                    norm_sent.append(self.normalize(word))
-                else:
-                    norm_sent.append(candidate)                   
+                norm_sent.append(candidate)                    
                         
         return " ".join(norm_sent)
