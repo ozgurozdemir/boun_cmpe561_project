@@ -89,6 +89,10 @@ class TurkishNormalizer:
                     if candidate != sentence[i]:
                         break
 
-                norm_sent.append(candidate)                    
+                # if higher ngrams are not found then check unigram
+                if candidate == sentence[i]:
+                    norm_sent.append(self.normalize(word))
+                else:
+                    norm_sent.append(candidate)                   
                         
         return " ".join(norm_sent)
