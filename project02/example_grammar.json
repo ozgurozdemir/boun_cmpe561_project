@@ -1,0 +1,34 @@
+{"variables": {
+  "S": [["NP", "Verb"]],
+  "NP": [["Det", "Noun"], ["NP", "Noun"], ["Noun", "NP"]],
+  "VP": [["NP", "VP"], ["Verb", "Aux"], ["Noun", "Verb"]],
+  "PP": [["NP", "Prep"]]},
+
+ "terminals": {
+   "Aux": {"other": ["etmek", "yapmak", "et"]},
+   "ADJ": {"other": ["keyifle"]},
+   "ADV": {"other": ["en", "güzel", "son", "yüksek"]},
+   "Verb": {"other": ["al", "oku", "et", "anlat", "katıl", "izle", "iz", "gel", "yap"]},
+   "Prep": {"other": ["altında"]},
+   "Pron": {"Singular": ["bu", "ben", "sen", "o", "bura", "ne", "mı", "mi"],
+          "Plural": ["bunlar", "biz", "siz", "onlar", "neler"],
+          "other": ["için"]},
+   "Det": {"Singular": ["bir", "birkaç", "birçok", "her"],
+           "Plural": ["bütün"]},
+   "Conj": {"other": ["ve"]},
+   "Noun": {"Past": ["dün"],
+            "Present": ["şimdi"],
+            "other": ["akşam", "arkadaş", "hediye", "okul", "tarih", "tarihi", "roman", "yemek", "destan", "milli", "kültür", "yardım", "yaz", "mevsim", "gece", "toplantı", "son", "zaman", "ses", "müzik"]}},
+
+  "constraints": {
+    "S": [["tense"]],
+    "NP": [["number"], ["number", "person"], ["number", "person"], ["tense"]],
+    "VP": [[], ["person"], ["tense"]],
+    "PP": [[]]},
+
+  "implies": {
+    "S": [1],
+    "NP": [1, 0, 1],
+    "VP": [1, 1, 1],
+    "PP": [0]
+}}
