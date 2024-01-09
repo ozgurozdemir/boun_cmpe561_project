@@ -29,7 +29,7 @@
  "PersonalEnd.2ndPL": ["-dınız", "-diniz", "-dunuz", "-dünüz"],
  "Conditional": ["-sa", "-se"],
  "Possess.3rd": ["-sında", "-sinde", "-sünde", "-suna", "-unda", "-ünde", "-ına", "-ine", "-su", "-sü", "-si", "-sı", "-ı", "-i", "-ü", "-u"],
- "Imperative.3rd": ["-sın", "-sin", "-sun", "-sün"],
+ "Imperative.2nd": ["-sın", "-sin", "-sun", "-sün"],
  "Copula.2ndPL": ["-sınız", "-siniz", "-sunuz", "-sünüz"],
  "Imperative.3rdPL": ["-sınlar", "-sinler", "-sunlar", "-sünler"],
  "Dativ": ["-a", "-e", "-ya", "-ye"],

@@ -5,10 +5,17 @@ from collections import Counter
 import nltk
 import string
 from tabulate import tabulate
-import zeyrek
+
+try:
+    import zeyrek
+    import nltk
+    nltk.download('punkt')
+    print(">> zeyrek module for morphological analysis is imported.")
+except ImportError:
+    print(":: zeyrek module for morphological analysis is missing. Program can run only in stemmer configuration.")
 
 class Variable():
-    def __init__(self, tag, terminal, left_child, right_child, subcat, text = None): #, span=None, token_range=None
+    def __init__(self, tag, terminal, left_child, right_child, subcat, text = None):
         self.terminal = terminal
         self.text = text
         self.pos = tag
@@ -17,20 +24,23 @@ class Variable():
         self.right_child = right_child
 
 class TurkishContextFreeGrammar:
-    def __init__(self, grammar_path, stemmer_args):
+    def __init__(self, grammar_path, morphological_analyzer_strategy="stemmer", stemmer_args=None):
         self.grammar_path = grammar_path
         self.stemmer_args = stemmer_args
+        self.morphological_analyzer_strategy = morphological_analyzer_strategy
 
         with open(grammar_path, "r", encoding="utf8") as file:
             grammar = json.load(file)
 
         self.variables = grammar["variables"]
         self.terminals = grammar["terminals"]
-
         self.constraints = grammar["constraints"]
-        self.implies = grammar["implies"]
 
-        self.stemmer = TurkishStemmer(**stemmer_args)
+        if self.morphological_analyzer_strategy == "stemmer":
+            self.stemmer = TurkishStemmer(**stemmer_args)
+        elif morphological_analyzer_strategy == "zeyrek":
+            self.morph_analyzer = zeyrek.MorphAnalyzer()
+
 
         self.suffixCategoryRules = {"person": "1st|2nd|3rd|1stPL|2ndPL|3rdPL",
                                     "tense": "Past|Present|Future",
@@ -39,8 +49,6 @@ class TurkishContextFreeGrammar:
         self.categoryMappings = {"1st|2nd|3rd|1stPL|2ndPL|3rdPL": "person",
                                  "Past|Present|Future": "tense",
                                  "Singular|Plural": "number"}
-
-        self.morph_analyzer = zeyrek.MorphAnalyzer()
 
 
     def prepareSuffixCategories(self, suffixCats):
@@ -55,19 +63,22 @@ class TurkishContextFreeGrammar:
 
 
     def mapCategoryLabels(self, category):
+        categoryLabels = {}
+
         for mapping in self.categoryMappings:
-            if re.search(mapping, category):
-                return self.categoryMappings[mapping]
+            mappingSearch = re.search(mapping, category)
+            if mappingSearch:
+                categoryLabels[self.categoryMappings[mapping]] = mappingSearch.group()
 
         # label is not found
-        return "other"
+        if len(categoryLabels) > 0:
+            return categoryLabels
+        else:
+          return {"other": category}
 
 
     def search_terminal(self, query, suffixCategories):
         tags = []
-
-        # suffix categories may override
-        #suffixCategories = self.prepareSuffixCategories(query[1])
 
         # root categories
         for category in self.terminals:
@@ -77,13 +88,12 @@ class TurkishContextFreeGrammar:
 
                 # subcategory is found
                 if query in self.terminals[category][subcat]:
-                    categoryLabel = self.mapCategoryLabels(subcat)
-                    subcategories[categoryLabel] = subcat
+                    subcategories = self.mapCategoryLabels(subcat)
 
                     # add/override suffix subcategories
                     for sCat in suffixCategories:
                         subcategories[sCat] = suffixCategories[sCat]
-            
+
             if len(subcategories) > 0:
                 tags.append((category, subcategories))
 
@@ -99,40 +109,29 @@ class TurkishContextFreeGrammar:
             for idxRule, rule in enumerate(self.variables[variable]):
                 cat    = [q[0] for q in query]
                 subcat = [q[1] for q in query]
+
                 # rule is found
                 if rule == cat:
-                    tags.append((variable, subcat[0]))
-                    """constraintControl = True
+                    constraintControl = True
                     constraintName = self.constraints[variable][idxRule]
 
                     # check constraints
-                    if constraintName is not None:
+                    # if constraintName is not None:
+                    # checking all defined constraints for the rule
+                    for const in constraintName:
 
-                        # checking all defined constraints for the rule
-                        for const in constraintName:
-
-                            # for all variables constraint must be satisfied
-                            for i in range(0, len(subcat)-1):
-                                if const in subcat[i] and const in subcat[i+1]:
-                                    constraintControl = constraintControl and subcat[i][const] == subcat[i+1][const]
+                        # for all variables constraint must be satisfied
+                        for i in range(0, len(subcat)-1):
+                            if const in subcat[i] and const in subcat[i+1]:
+                                constraintControl = constraintControl and subcat[i][const] == subcat[i+1][const]
 
                     # if the constraint is satisfied add the tag
                     if constraintControl:
-                        implyIdx = self.implies[variable][idxRule]
-                        tags.append((variable, subcat[implyIdx]))"""
+                        # TODO: append subcats
+                        tags.append((variable, subcat[0]))
         return tags
 
-    def calculate_spans(self, tokens, sentence):
-        spans = []
-        last = 0
-        for token in tokens:
-            idx = sentence[last:].find(token)
-            first = last + idx
-            last = first + len(token)
-            spans.append((first, last))
 
-        return spans
-    
     def cky(self, tokens, vars):
         table = [[[] for i in range(len(tokens))] for j in range(len(tokens))]
         for i in range(len(tokens)):
@@ -151,7 +150,7 @@ class TurkishContextFreeGrammar:
                             for v in var:
                                 table[i][j].append(Variable(v[0], False, var1, var2, v[1]))
         return table
-    
+
     def print_tree(self, var):
         if var.terminal:
             return f"({var.pos} {var.text})"
@@ -163,7 +162,7 @@ class TurkishContextFreeGrammar:
         for var in table[0][len(tokens)-1]:
             parses.append(self.print_tree(var))
         return parses
-    
+
     def print_table(self, table, tokens):
         print('----------- CKY Table -----------')
         chart = []
@@ -180,15 +179,18 @@ class TurkishContextFreeGrammar:
                 else:
                     row.append([])
             chart.append(row)
-        
+
         print(tabulate(chart, headers="firstrow", tablefmt="grid"))
-            
-    
-    def remove_punctuation(self, sentence):
-        for punc in string.punctuation:
-            sentence = sentence.replace(punc, "")
-        return sentence
-    
+
+
+    def check_validity(self, table):
+        posses = [var.pos for var in table[0][len(table)-1]]
+        if 'S' not in posses:
+            return False
+        else:
+            return True
+
+
     def get_tense(self, morphemes):
         tense = None
         present = ['Prog1', 'Prog2', 'Aor', 'Cop', 'Pres']
@@ -200,7 +202,7 @@ class TurkishContextFreeGrammar:
             elif 'Fut' in inf:
                 tense = 'Future'
         return tense
-    
+
     def get_person(self, morphemes):
         person = None
         number = None
@@ -223,9 +225,9 @@ class TurkishContextFreeGrammar:
             elif '3pl' in inf:
                 person = '3rdPL'
                 number = 'Plural'
-        
+
         return person, number
-    
+
     def get_number(self, morphemes):
         number = None
         if 'Plural' in morphemes:
@@ -233,7 +235,7 @@ class TurkishContextFreeGrammar:
         else:
             number = 'Singular'
         return number
-    
+
     def create_subcategories(self, tense, person, number):
         return_dict = {}
         if tense:
@@ -245,7 +247,7 @@ class TurkishContextFreeGrammar:
         if return_dict == {}:
             return_dict['other'] = 'other'
         return return_dict
-    
+
     def adjust_pos(self, pos):
         if pos == "Ques":
             return "Q"
@@ -255,63 +257,72 @@ class TurkishContextFreeGrammar:
             return "ADV"
         else:
             return pos
-    
-    def check_validity(self, table):
-        if 'S' not in table[0][len(table)-1]:
-            return False
+
+
+    def extract_pos_categories_zeyrek(self, token):
+        parse = self.morph_analyzer.analyze(token)[0][0]
+        pos = parse.pos
+        pos = self.adjust_pos(pos)
+        morphemes = parse.morphemes
+        tense = self.get_tense(morphemes)
+        person, number = self.get_person(morphemes)
+        subcats = self.create_subcategories(tense, person, number)
+
+        # if the token is in the grammar use it, otherwise use info from zeyrek
+        var = self.search_terminal(token.lower(), subcats)
+        if var:
+            pos = var[0][0]
+            subcats = var[0][1]
+
+        return pos, subcats
+
+
+    def extract_pos_categories_stemmer(self, token):
+        stem, suffixes = self.stemmer.stem(token)
+        suffixes = self.prepareSuffixCategories(suffixes)
+
+        categories = self.search_terminal(stem, suffixes)
+
+        if len(categories) != 0:
+            pos = categories[0][0]
+            subcats = categories[0][1]
         else:
-            return True
-        
+            pos = "??"
+            subcats = {}
+        return pos, subcats
+
+
+    def tokenize(self, sentence):
+        return re.findall("\w+|\.\.\.|[\.\?\!\-\"\']", sentence)
+
     def parse(self, sentence):
-        sentence = self.remove_punctuation(sentence)
-        tokens = nltk.tokenize.word_tokenize(sentence)
-        print("Tokens: "+ str(tokens))
+        tokens = self.tokenize(sentence)
+        words = [token for token in tokens if token not in string.punctuation]
+        punct = [(token, idx) for idx, token in enumerate(tokens) if token in string.punctuation]
+
+        print("Tokens: "+ str(words))
         vars = []
         pos_tags = []
 
-        for token in tokens:
-            #query = self.stemmer.stem(token.lower())
-            #query = (token.lower(), [self.morph_analyzer.analyze(token)[0][0].pos])
+        for token in words:
+            if self.morphological_analyzer_strategy == "zeyrek":
+                pos, subcats = self.extract_pos_categories_zeyrek(token)
 
-            parse = self.morph_analyzer.analyze(token)[0][0]
-            pos = parse.pos
-            pos = self.adjust_pos(pos)
-            morphemes = parse.morphemes
-            tense = self.get_tense(morphemes)
-            person, number = self.get_person(morphemes)
-            subcats = self.create_subcategories(tense, person, number)
-            var = self.search_terminal(token.lower(), subcats)
-            if var:
-                vars.append(Variable(var[0][0], True, None, None, var[0][1], token))
-                #vars.append(var[0])
-                pos_tags.append(var[0][0])
-            else:
-                vars.append(Variable(pos, True, None, None, subcats, token))
-                #vars.append((pos, subcats))
-                pos_tags.append(pos)
+            elif self.morphological_analyzer_strategy == "stemmer":
+                pos, subcats = self.extract_pos_categories_stemmer(token.lower())
+
+            vars.append(Variable(pos, True, None, None, subcats, token))
+            pos_tags.append(pos)
 
         print("POS Tags:"+ str(pos_tags))
-        table = self.cky(tokens, vars)
-        self.print_table(table, tokens)
+        table = self.cky(words, vars)
+        self.print_table(table, words)
         if self.check_validity(table):
             print("Sentence is grammatically valid.")
-            parses = self.return_possible_parses(table, tokens)
-            print("Possible parses:")
+            parses = self.return_possible_parses(table, words)
+            print("Possible parses: ")
             for parse in parses:
                 print(parse)
+            
         else:
             print("Sentence is grammatically invalid.")
-        
-    
-if __name__ == "__main__":
-
-    stemmer_args = {"lexicon_path": "project02/lexicon.txt",
-                    "suffixes_path": "project02/suffix_rules.json",
-                    "corpus_path": "project02/corpus.txt",
-                    "include_categories": True,
-                    "use_derivational": False}
-
-    turkishCFG = TurkishContextFreeGrammar("project02/example_grammar.json", stemmer_args)
-
-    turkishCFG.parse("Ben dün akşam yemeği için anneme yardım ettim")
-
