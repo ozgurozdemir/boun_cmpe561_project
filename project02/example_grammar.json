@@ -1,5 +1,5 @@
 {"variables": {
-  "S": [["NP", "Verb"], ["NP", "VP"], ["Pron", "VP"], ["NP", "QP"], ["PP", "VP"], ["ADV", "VP"], ["VP", "QP"], ["QP", "VP"], ["NP", "S"], ["PP", "S"], ["VP", "S"], ["S", "S"], ["S", "VP"], ["S", "PP"], ["S", "NP"], ["S", "QP"], ["QP", "S"], ["Noun", "S"], ["Noun", "VP"], ["Noun", "Verb"], ["Pron", "Verb"], ["Pron", "VP"], ["Dat", "QP"]],
+  "S": [["NP", "Verb"], ["NP", "VP"], ["Pron", "VP"], ["NP", "QP"], ["PP", "VP"], ["ADV", "VP"], ["VP", "QP"], ["QP", "VP"], ["Noun", "VP"], ["Pron", "Verb"], ["Pron", "VP"]],
   "NP": [["NP", "NP"], ["Det", "Noun"], ["Det", "NP"], ["NP", "Noun"], ["Noun", "NP"], ["Pron", "Noun"], ["Pron", "NP"], ["NP", "PP"], ["NP", "Postp"], ["Noun", "Postp"], ["ADJ", "Noun"], ["ADJ", "NP"], ["NP", "Conj"], ["Noun", "Conj"], ["Conj", "NP"], ["Conj", "Noun"], ["Noun", "Noun"]],
   "VP": [["NP", "VP"], ["Verb", "Aux"], ["Noun", "Verb"], ["ADV", "VP"], ["ADV", "Verb"], ["Noun", "VP"], ["Dat", "VP"], ["QP", "VP"], ["QP", "Verb"], ["ADV", "ADJ"], ["Dat", "VP"], ["NP", "Verb"], ["Pron", "Verb"], ["Pron", "VP"]],
   "PP": [["NP", "Prep"]],
@@ -13,7 +13,7 @@
  "terminals": {
    "Aux": {"other": ["etmek", "yapmak", "et"]},
    "ADV": {"other": ["keyifle", "epeyce", "sesle"]},
-   "ADJ": {"other": ["en", "güzel", "son", "yüksek", "akşamki", "her", "tarihi", "yüksek"]},
+   "ADJ": {"other": ["en", "güzel", "son", "yüksek", "her", "tarihi", "yüksek"]},
    "Q": {"1st": ["mısın"], "2nd": ["misin"], "3rd": ["musun"], "other": ["ne"]},
    "Verb": {"other": ["al", "oku", "et", "anlat", "katıl", "izle", "iz", "gel", "yap", "anlatır", "git"]},
    "Prep": {"other": ["altında"]},
@@ -24,19 +24,17 @@
    "Postp": {"other": ["ile", "ve", "için"]},
    "Det": {"Singular": ["bir", "birkaç", "birçok"],
            "Plural": ["bütün"]},
-   "Dat": {"other": ["anneme", "arkadaşıma", "köye", "buraya", "toplantıya"]},
    "Conj": {"other": ["ve"]},
    "Noun": {"Past": ["dün"],
             "Present": ["şimdi"],
             "other": ["akşam", "arkadaş", "hediye", "okul", "tarih", "tarihi", "roman", "yemek", "destan", "milli", "kültür", "yardım", "yaz", "mevsim", "gece", "toplantı", "son", "zaman", "ses", "müzik", "mehtabı"]}},
 
   "constraints": {
-    "S": [["tense"], ["tense"], ["number", "person"], ["number", "person"], ["tense"], [], ["number", "person"], ["number", "person"], [], [], [], [], [], [], [], [], [], [], ["tense"], ["tense"], ["number", "person"], ["number", "person"]],
+    "S": [["tense", "person"], ["tense", "person"], ["number", "person"], ["number", "person"], ["tense"], [], ["number", "person"], ["number", "person"], ["tense"], ["number", "person"], ["number", "person"]],
     "NP": [[], ["number"], ["number"], ["number", "person"], ["number", "person"], ["number", "person"], ["number", "person"], [], [], [], [], [], [], [], [], [], ["number", "person"]],
-    "VP": [["tense"], ["tense"], ["tense"], [], [], ["tense"], [], [], [], [], [], ["tense"], ["number", "person"], ["number", "person"]],
+    "VP": [["person", "tense"], ["tense"], ["tense", "person"], [], [], ["tense"], [], [], [], [], [], ["tense", "person"], ["number", "person"], ["number", "person"]],
     "PP": [[]],
     "QP": [["person"], ["person"], ["person"], ["person"], [], [], [], []],
-    "Dat": [[], []],
     "ADJ": [[]],
     "ADV": [[]]}
 

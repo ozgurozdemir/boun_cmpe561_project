@@ -23,6 +23,13 @@ class Variable():
         self.left_child = left_child
         self.right_child = right_child
 
+    def __in__(varlist, var):
+        for v in varlist:
+            if var.pos == v.pos and var.subcat == v.subcat:
+                return True
+        return False
+
+
 class TurkishContextFreeGrammar:
     def __init__(self, grammar_path, morphological_analyzer_strategy="stemmer", stemmer_args=None):
         self.grammar_path = grammar_path
@@ -134,10 +141,12 @@ class TurkishContextFreeGrammar:
 
     def cky(self, tokens, vars):
         table = [[[] for i in range(len(tokens))] for j in range(len(tokens))]
+
+        # initalizing the diagonal elements
         for i in range(len(tokens)):
             if vars[i]:
-                table[i][i] = [vars[i]]
-            
+                table[i][i] += vars[i]
+
         for j in range(1, len(tokens)):
             for i in range(j-1, -1, -1):
                 for k in range(i, j):
@@ -146,21 +155,25 @@ class TurkishContextFreeGrammar:
 
                     for var1 in left:
                         for var2 in right:
-                            var = self.search_variable([(var1.pos, var1.subcat), (var2.pos, var2.subcat)])
+                            var = turkishCFG.search_variable([(var1.pos, var1.subcat), (var2.pos, var2.subcat)])
                             for v in var:
-                                table[i][j].append(Variable(v[0], False, var1, var2, v[1]))
+                                found = Variable(v[0], False, var1, var2, v[1])
+                                if not Variable.__in__(table[i][j], found):
+                                    table[i][j].append(found)
         return table
+
 
     def print_tree(self, var):
         if var.terminal:
             return f"({var.pos} {var.text})"
         else:
             return f"({var.pos} {self.print_tree(var.left_child)} {self.print_tree(var.right_child)})"
-        
+
     def return_possible_parses(self, table, tokens):
         parses = []
         for var in table[0][len(tokens)-1]:
-            parses.append(self.print_tree(var))
+            if var.pos == "S":
+                parses.append(self.print_tree(var))
         return parses
 
     def print_table(self, table, tokens):
@@ -260,21 +273,30 @@ class TurkishContextFreeGrammar:
 
 
     def extract_pos_categories_zeyrek(self, token):
-        parse = self.morph_analyzer.analyze(token)[0][0]
-        pos = parse.pos
-        pos = self.adjust_pos(pos)
-        morphemes = parse.morphemes
-        tense = self.get_tense(morphemes)
-        person, number = self.get_person(morphemes)
-        subcats = self.create_subcategories(tense, person, number)
+        parse = self.morph_analyzer.analyze(token)[0]
+        pos_list = []
+        subcats_list = []
 
-        # if the token is in the grammar use it, otherwise use info from zeyrek
-        var = self.search_terminal(token.lower(), subcats)
-        if var:
-            pos = var[0][0]
-            subcats = var[0][1]
+        for p in parse:
+            pos = p.pos
+            pos = self.adjust_pos(pos)
+            morphemes = p.morphemes
+            tense = self.get_tense(morphemes)
+            person, number = self.get_person(morphemes)
+            subcats = self.create_subcategories(tense, person, number)
 
-        return pos, subcats
+            # if the token is in the grammar use it, otherwise use info from zeyrek
+            var = self.search_terminal(token.lower(), subcats)
+            if var:
+                pos_list.append(var[0][0])
+                subcats_list.append(var[0][1])
+
+            pos_list.append(pos)
+            subcats_list.append(subcats)
+
+        subcats_list = [(p, subcats_list[i]) for i, p in enumerate(pos_list)]
+        return pos_list, subcats_list
+
 
 
     def extract_pos_categories_stemmer(self, token):
@@ -308,11 +330,19 @@ class TurkishContextFreeGrammar:
             if self.morphological_analyzer_strategy == "zeyrek":
                 pos, subcats = self.extract_pos_categories_zeyrek(token)
 
+                _v, _p = [], []
+                for p, s in zip(pos, subcats):
+                    _v.append((Variable(p, True, None, None, s, token)))
+                    _p.append(p)
+
+                vars.append(_v)
+                pos_tags.append(_p)
+
             elif self.morphological_analyzer_strategy == "stemmer":
                 pos, subcats = self.extract_pos_categories_stemmer(token.lower())
 
-            vars.append(Variable(pos, True, None, None, subcats, token))
-            pos_tags.append(pos)
+                vars.append([Variable(pos, True, None, None, subcats, token)])
+                pos_tags.append(pos)
 
         print("POS Tags:"+ str(pos_tags))
         table = self.cky(words, vars)
@@ -323,6 +353,6 @@ class TurkishContextFreeGrammar:
             print("Possible parses: ")
             for parse in parses:
                 print(parse)
-            
+
         else:
             print("Sentence is grammatically invalid.")
