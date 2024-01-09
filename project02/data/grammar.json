@@ -27,10 +27,10 @@
    "Conj": {"other": ["ve"]},
    "Noun": {"Past": ["dün"],
             "Present": ["şimdi"],
-            "other": ["akşam", "arkadaş", "hediye", "okul", "tarih", "tarihi", "roman", "yemek", "destan", "milli", "kültür", "yardım", "yaz", "mevsim", "gece", "toplantı", "son", "zaman", "ses", "müzik", "mehtabı"]}},
+            "other": ["akşam", "anne", "arkadaş", "hediye", "okul", "tarih", "tarihi", "roman", "yemek", "destan", "milli", "kültür", "yardım", "yaz", "mevsim", "gece", "toplantı", "son", "zaman", "ses", "müzik", "mehtabı"]}},
 
   "constraints": {
-    "S": [["tense", "person"], ["tense", "person"], ["number", "person"], ["number", "person"], ["tense"], [], ["number", "person"], ["number", "person"], ["tense"], ["number", "person"], ["number", "person"]],
+    "S": [["tense", "person"], ["tense", "person"], ["number", "person"], ["number", "person"], ["tense"], [], ["number", "person"], ["number", "person"], ["tense", "person"], ["number", "person"], ["number", "person"]],
     "NP": [[], ["number"], ["number"], ["number", "person"], ["number", "person"], ["number", "person"], ["number", "person"], [], [], [], [], [], [], [], [], [], ["number", "person"]],
     "VP": [["person", "tense"], ["tense"], ["tense", "person"], [], [], ["tense"], [], [], [], [], [], ["tense", "person"], ["number", "person"], ["number", "person"]],
     "PP": [[]],

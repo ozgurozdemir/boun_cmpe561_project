@@ -9,8 +9,14 @@ from tabulate import tabulate
 try:
     import zeyrek
     import nltk
+    import logging
+
+    logger = logging.getLogger("zeyrek.rulebasedanalyzer")
+    logger.disabled = True
+
     nltk.download('punkt')
     print(">> zeyrek module for morphological analysis is imported.")
+
 except ImportError:
     print(":: zeyrek module for morphological analysis is missing. Program can run only in stemmer configuration.")
 
@@ -134,8 +140,17 @@ class TurkishContextFreeGrammar:
 
                     # if the constraint is satisfied add the tag
                     if constraintControl:
-                        # TODO: append subcats
-                        tags.append((variable, subcat[0]))
+                        # combine subcategories
+                        combinedSubcat = {}
+                        for s in subcat:
+                            if type(s) == tuple:
+                                for c in s[1]:
+                                    combinedSubcat[c] = s[1][c]
+                            else:
+                                for c in s:
+                                    combinedSubcat[c] = s[c]
+
+                        tags.append((variable, combinedSubcat))
         return tags
 
 
@@ -155,7 +170,7 @@ class TurkishContextFreeGrammar:
 
                     for var1 in left:
                         for var2 in right:
-                            var = turkishCFG.search_variable([(var1.pos, var1.subcat), (var2.pos, var2.subcat)])
+                            var = self.search_variable([(var1.pos, var1.subcat), (var2.pos, var2.subcat)])
                             for v in var:
                                 found = Variable(v[0], False, var1, var2, v[1])
                                 if not Variable.__in__(table[i][j], found):
@@ -317,7 +332,7 @@ class TurkishContextFreeGrammar:
     def tokenize(self, sentence):
         return re.findall("\w+|\.\.\.|[\.\?\!\-\"\']", sentence)
 
-    def parse(self, sentence):
+    def parse(self, sentence, print_table=True):
         tokens = self.tokenize(sentence)
         words = [token for token in tokens if token not in string.punctuation]
         punct = [(token, idx) for idx, token in enumerate(tokens) if token in string.punctuation]
@@ -345,8 +360,14 @@ class TurkishContextFreeGrammar:
                 pos_tags.append(pos)
 
         print("POS Tags:"+ str(pos_tags))
+
+        # apply CKY
         table = self.cky(words, vars)
-        self.print_table(table, words)
+
+        if print_table:
+            self.print_table(table, words)
+
+        # print out the parses
         if self.check_validity(table):
             print("Sentence is grammatically valid.")
             parses = self.return_possible_parses(table, words)
