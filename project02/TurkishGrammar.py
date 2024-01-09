@@ -54,11 +54,11 @@ class TurkishContextFreeGrammar:
         return "other"
 
 
-    def search_terminal(self, query):
+    def search_terminal(self, query, suffixCategories):
         tags = []
 
         # suffix categories may override
-        suffixCategories = self.prepareSuffixCategories(query[1])
+        #suffixCategories = self.prepareSuffixCategories(query[1])
 
         # root categories
         for category in self.terminals:
@@ -67,14 +67,14 @@ class TurkishContextFreeGrammar:
             for subcat in self.terminals[category]:
 
                 # subcategory is found
-                if query[0] in self.terminals[category][subcat]:
+                if query in self.terminals[category][subcat]:
                     categoryLabel = self.mapCategoryLabels(subcat)
                     subcategories[categoryLabel] = subcat
 
                     # add/override suffix subcategories
                     for sCat in suffixCategories:
                         subcategories[sCat] = suffixCategories[sCat]
-
+            
             if len(subcategories) > 0:
                 tags.append((category, subcategories))
 
@@ -92,8 +92,8 @@ class TurkishContextFreeGrammar:
                 subcat = [q[1] for q in query]
                 # rule is found
                 if rule == cat:
-                    tags.append((variable, subcat[0]))
-                    """constraintControl = True
+                    #tags.append((variable, subcat[0]))
+                    constraintControl = True
                     constraintName = self.constraints[variable][idxRule]
 
                     # check constraints
@@ -110,7 +110,7 @@ class TurkishContextFreeGrammar:
                     # if the constraint is satisfied add the tag
                     if constraintControl:
                         implyIdx = self.implies[variable][idxRule]
-                        tags.append((variable, subcat[implyIdx]))"""
+                        tags.append((variable, subcat[implyIdx]))
         return tags
 
     def calculate_spans(self, tokens, sentence):
@@ -168,38 +168,38 @@ class TurkishContextFreeGrammar:
     
     def get_tense(self, morphemes):
         tense = None
-        present = ['Prog1', 'Prog2', 'Aor', 'Cop']
-        for inf in present:
-            if inf in morphemes:
-                tense =  'Present'
-        if 'Fut' in morphemes:
-            tense =  'Future'
-        if 'Past' in morphemes:
-            tense =  'Past'
+        present = ['Prog1', 'Prog2', 'Aor', 'Cop', 'Pres']
+        for inf in morphemes:
+            if inf in present:
+                tense = 'Present'
+            elif 'Past' in inf:
+                tense = 'Past'
+            elif 'Fut' in inf:
+                tense = 'Future'
         return tense
     
     def get_person(self, morphemes):
         person = None
         number = None
-
-        if '1sg' in morphemes:
-            person = '1st'
-            number = 'Singular'
-        elif '1pl' in morphemes:
-            person = '1st'
-            number = 'Plural'
-        elif '2sg' in morphemes:
-            person = '2nd'
-            number = 'Singular'
-        elif '2pl' in morphemes:
-            person = '2nd'
-            number = 'Plural'
-        elif '3sg' in morphemes:
-            person = '3rd'
-            number = 'Singular'
-        elif '3pl' in morphemes:
-            person = '3rd'
-            number = 'Plural'
+        for inf in morphemes:
+            if '1sg' in inf:
+                person = '1st'
+                number = 'Singular'
+            elif '1pl' in inf:
+                person = '1stPL'
+                number = 'Plural'
+            elif '2sg' in inf:
+                person = '2nd'
+                number = 'Singular'
+            elif '2pl' in inf:
+                person = '2ndPL'
+                number = 'Plural'
+            elif '3sg' in inf:
+                person = '3rd'
+                number = 'Singular'
+            elif '3pl' in inf:
+                person = '3rdPL'
+                number = 'Plural'
         
         return person, number
     
@@ -210,7 +210,19 @@ class TurkishContextFreeGrammar:
         else:
             number = 'Singular'
         return number
-
+    
+    def create_subcategories(self, tense, person, number):
+        return_dict = {}
+        if tense:
+            return_dict['tense'] = tense
+        if person:
+            return_dict['person'] = person
+        if number:
+            return_dict['number'] = number
+        if return_dict == {}:
+            return_dict['other'] = 'other'
+        return return_dict
+    
     def adjust_pos(self, pos):
         if pos == "Ques":
             return "Q"
@@ -220,6 +232,12 @@ class TurkishContextFreeGrammar:
             return "ADV"
         else:
             return pos
+    
+    def check_validity(self, table):
+        if 'S' not in table[0][len(table)-1]:
+            return False
+        else:
+            return True
         
     def parse(self, sentence):
         sentence = self.remove_punctuation(sentence)
@@ -230,41 +248,30 @@ class TurkishContextFreeGrammar:
 
         for token in tokens:
             #query = self.stemmer.stem(token.lower())
-            query = (token.lower(), [self.morph_analyzer.analyze(token)[0][0].pos])
-            var = self.search_terminal(query)
+            #query = (token.lower(), [self.morph_analyzer.analyze(token)[0][0].pos])
+
+            parse = self.morph_analyzer.analyze(token)[0][0]
+            pos = parse.pos
+            pos = self.adjust_pos(pos)
+            morphemes = parse.morphemes
+            tense = self.get_tense(morphemes)
+            person, number = self.get_person(morphemes)
+            subcats = self.create_subcategories(tense, person, number)
+            var = self.search_terminal(token.lower(), subcats)
             if var:
                 vars.append(var[0])
                 pos_tags.append(var[0][0])
             else:
-                parse = self.morph_analyzer.analyze(token)[0][0]
-                pos = parse.pos
-                pos = self.adjust_pos(pos)
+                vars.append((pos, subcats))
                 pos_tags.append(pos)
-                morphemes = parse.morphemes
-                tense = self.get_tense(morphemes)
-                person, number = self.get_person(morphemes[-1])
-
-                if tense and person and number:
-                    vars.append((pos, {'tense': tense, 'person': person, 'number': number}))
-                elif tense and person:
-                    vars.append((pos, {'tense': tense, 'person': person}))
-                elif tense and number:
-                    vars.append((pos, {'tense': tense, 'number': number}))
-                elif person and number:
-                    vars.append((pos, {'person': person, 'number': number}))
-                elif tense:
-                    vars.append((pos, {'tense': tense}))
-                elif person:
-                    vars.append((pos, {'person': person}))
-                elif number:
-                    vars.append((pos, {'number': number}))
-                else:
-                    vars.append((pos, {'other': 'other'}))
-                
 
         print("POS Tags:"+ str(pos_tags))
         table = self.cky(tokens, vars)
         self.print_table(table, tokens)
+        if self.check_validity(table):
+            print("Sentence is grammatically valid.")
+        else:
+            print("Sentence is grammatically invalid.")
         
     
 if __name__ == "__main__":
@@ -277,4 +284,5 @@ if __name__ == "__main__":
 
     turkishCFG = TurkishContextFreeGrammar("project02/example_grammar.json", stemmer_args)
 
-    turkishCFG.parse("Destanlar milli kültürümüzü ve tarihimizi anlatır")
+    turkishCFG.parse("Bu akşamki toplantıya katılacak mısınız")
+

@@ -30,10 +30,14 @@
             "other": ["akşam", "arkadaş", "hediye", "okul", "tarih", "tarihi", "roman", "yemek", "destan", "milli", "kültür", "yardım", "yaz", "mevsim", "gece", "toplantı", "son", "zaman", "ses", "müzik", "mehtabı"]}},
 
   "constraints": {
-    "S": [["tense"]],
+    "S": [["tense"], ["tense"]],
     "NP": [["number"], ["number", "person"], ["number", "person"], ["tense"]],
     "VP": [[], ["person"], ["tense"]],
-    "PP": [[]]},
+    "PP": [[]],
+    "QP": [[]],
+    "Dat": [[]],
+    "ADJ": [[]],
+    "ADV": [[]]},
 
   "implies": {
     "S": [1],
