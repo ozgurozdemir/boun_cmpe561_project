@@ -7,6 +7,15 @@ import string
 from tabulate import tabulate
 import zeyrek
 
+class Variable():
+    def __init__(self, tag, terminal, left_child, right_child, subcat, text = None): #, span=None, token_range=None
+        self.terminal = terminal
+        self.text = text
+        self.pos = tag
+        self.subcat = subcat
+        self.left_child = left_child
+        self.right_child = right_child
+
 class TurkishContextFreeGrammar:
     def __init__(self, grammar_path, stemmer_args):
         self.grammar_path = grammar_path
@@ -92,8 +101,8 @@ class TurkishContextFreeGrammar:
                 subcat = [q[1] for q in query]
                 # rule is found
                 if rule == cat:
-                    #tags.append((variable, subcat[0]))
-                    constraintControl = True
+                    tags.append((variable, subcat[0]))
+                    """constraintControl = True
                     constraintName = self.constraints[variable][idxRule]
 
                     # check constraints
@@ -110,7 +119,7 @@ class TurkishContextFreeGrammar:
                     # if the constraint is satisfied add the tag
                     if constraintControl:
                         implyIdx = self.implies[variable][idxRule]
-                        tags.append((variable, subcat[implyIdx]))
+                        tags.append((variable, subcat[implyIdx]))"""
         return tags
 
     def calculate_spans(self, tokens, sentence):
@@ -127,19 +136,33 @@ class TurkishContextFreeGrammar:
     def cky(self, tokens, vars):
         table = [[[] for i in range(len(tokens))] for j in range(len(tokens))]
         for i in range(len(tokens)):
-            table[i][i] = [vars[i]]
+            if vars[i]:
+                table[i][i] = [vars[i]]
+            
         for j in range(1, len(tokens)):
             for i in range(j-1, -1, -1):
                 for k in range(i, j):
-                    for var1 in table[i][k]:
-                        for var2 in table[k+1][j]:
-                            var = self.search_variable([var1, var2])
-                            if var:
-                                for v in var:
-                                    if v not in table[i][j]:
-                                        table[i][j].append(v)
+                    left = table[i][k]
+                    right = table[k+1][j]
 
+                    for var1 in left:
+                        for var2 in right:
+                            var = self.search_variable([(var1.pos, var1.subcat), (var2.pos, var2.subcat)])
+                            for v in var:
+                                table[i][j].append(Variable(v[0], False, var1, var2, v[1]))
         return table
+    
+    def print_tree(self, var):
+        if var.terminal:
+            return f"({var.pos} {var.text})"
+        else:
+            return f"({var.pos} {self.print_tree(var.left_child)} {self.print_tree(var.right_child)})"
+        
+    def return_possible_parses(self, table, tokens):
+        parses = []
+        for var in table[0][len(tokens)-1]:
+            parses.append(self.print_tree(var))
+        return parses
     
     def print_table(self, table, tokens):
         print('----------- CKY Table -----------')
@@ -152,7 +175,7 @@ class TurkishContextFreeGrammar:
                 parse_list = []
                 if parses:
                     for parse in parses:
-                        parse_list.append(parse[0])
+                        parse_list.append(parse.pos)
                     row.append(parse_list)
                 else:
                     row.append([])
@@ -259,10 +282,12 @@ class TurkishContextFreeGrammar:
             subcats = self.create_subcategories(tense, person, number)
             var = self.search_terminal(token.lower(), subcats)
             if var:
-                vars.append(var[0])
+                vars.append(Variable(var[0][0], True, None, None, var[0][1], token))
+                #vars.append(var[0])
                 pos_tags.append(var[0][0])
             else:
-                vars.append((pos, subcats))
+                vars.append(Variable(pos, True, None, None, subcats, token))
+                #vars.append((pos, subcats))
                 pos_tags.append(pos)
 
         print("POS Tags:"+ str(pos_tags))
@@ -270,6 +295,10 @@ class TurkishContextFreeGrammar:
         self.print_table(table, tokens)
         if self.check_validity(table):
             print("Sentence is grammatically valid.")
+            parses = self.return_possible_parses(table, tokens)
+            print("Possible parses:")
+            for parse in parses:
+                print(parse)
         else:
             print("Sentence is grammatically invalid.")
         
@@ -284,5 +313,5 @@ if __name__ == "__main__":
 
     turkishCFG = TurkishContextFreeGrammar("project02/example_grammar.json", stemmer_args)
 
-    turkishCFG.parse("Bu akşamki toplantıya katılacak mısınız")
+    turkishCFG.parse("Ben dün akşam yemeği için anneme yardım ettim")
 

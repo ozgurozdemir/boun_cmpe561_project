@@ -1,5 +1,5 @@
 {"variables": {
-  "S": [["NP", "Verb"], ["NP", "VP"], ["Pron", "VP"], ["NP", "QP"], ["PP", "VP"], ["ADV", "VP"], ["VP", "QP"], ["QP", "VP"], ["NP", "S"], ["PP", "S"], ["VP", "S"], ["S", "S"], ["S", "VP"], ["S", "PP"], ["S", "NP"], ["S", "QP"], ["QP", "S"], ["Noun", "S"], ["Noun", "VP"]],
+  "S": [["NP", "Verb"], ["NP", "VP"], ["Pron", "VP"], ["NP", "QP"], ["PP", "VP"], ["ADV", "VP"], ["VP", "QP"], ["QP", "VP"], ["NP", "S"], ["PP", "S"], ["VP", "S"], ["S", "S"], ["S", "VP"], ["S", "PP"], ["S", "NP"], ["S", "QP"], ["QP", "S"], ["Noun", "S"], ["Noun", "VP"], ["Dat", "QP"]],
   "NP": [["NP", "NP"], ["Det", "Noun"], ["Det", "NP"], ["NP", "Noun"], ["Noun", "NP"], ["Pron", "Noun"], ["Pron", "NP"], ["NP", "PP"], ["NP", "Postp"], ["Noun", "Postp"], ["ADJ", "Noun"], ["ADJ", "NP"], ["NP", "Conj"], ["Noun", "Conj"], ["Conj", "NP"], ["Conj", "Noun"], ["Noun", "Noun"]],
   "VP": [["NP", "VP"], ["Verb", "Aux"], ["Noun", "Verb"], ["ADV", "VP"], ["ADV", "Verb"], ["Noun", "VP"], ["Dat", "VP"], ["QP", "VP"], ["QP", "Verb"], ["ADV", "ADJ"], ["Dat", "VP"], ["NP", "Verb"]],
   "PP": [["NP", "Prep"]],
