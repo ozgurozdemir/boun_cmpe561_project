@@ -57,11 +57,14 @@ class TurkishContextFreeGrammar:
 
         self.suffixCategoryRules = {"person": "1st|2nd|3rd|1stPL|2ndPL|3rdPL",
                                     "tense": "Past|Present|Future",
-                                    "number": "Plural"}
+                                    "number": "Plural",
+                                    "case": "Ablative|Dativ|Locative|Accusative"}
 
         self.categoryMappings = {"1st|2nd|3rd|1stPL|2ndPL|3rdPL": "person",
                                  "Past|Present|Future": "tense",
-                                 "Singular|Plural": "number"}
+                                 "Singular|Plural": "number",
+                                 "Ablative|Dativ|Locative|Accusative": "case"
+                                 }
 
 
     def prepareSuffixCategories(self, suffixCats):
@@ -81,7 +84,11 @@ class TurkishContextFreeGrammar:
         for mapping in self.categoryMappings:
             mappingSearch = re.search(mapping, category)
             if mappingSearch:
-                categoryLabels[self.categoryMappings[mapping]] = mappingSearch.group()
+                foundGroup = mappingSearch.group()
+                if mapping == "Ablative|Dativ|Locative|Accusative":
+                    foundGroup = "Dativ" if foundGroup in "AblativeDativ" else "Accusative"
+
+                categoryLabels[self.categoryMappings[mapping]] = foundGroup
 
         # label is not found
         if len(categoryLabels) > 0:
@@ -105,7 +112,11 @@ class TurkishContextFreeGrammar:
 
                     # add/override suffix subcategories
                     for sCat in suffixCategories:
-                        subcategories[sCat] = suffixCategories[sCat]
+                        suffixCat = suffixCategories[sCat]
+                        suffixCat = "Dativ" if suffixCat in "AblativeDativ" else suffixCat
+                        suffixCat = "Accusative" if suffixCat in "LocativeAccusative" else suffixCat
+
+                        subcategories[sCat] = suffixCat
 
             if len(subcategories) > 0:
                 tags.append((category, subcategories))
@@ -135,6 +146,13 @@ class TurkishContextFreeGrammar:
 
                         # for all variables constraint must be satisfied
                         for i in range(0, len(subcat)-1):
+                            # if the verb constituent has a "Dativ" case-subcategory the other must have it
+                            if const == "case" and (cat[i] == "VP" or cat[i+1] == "Verb"):
+                                if const in subcat[i] and subcat[i][const] == "Dativ":
+                                    constraintControl = constraintControl and (const in subcat[i] and const in subcat[i+1])
+                                elif const in subcat[i+1] and subcat[i+1][const] == "Dativ":
+                                    constraintControl = constraintControl and (const in subcat[i] and const in subcat[i+1])
+
                             if const in subcat[i] and const in subcat[i+1]:
                                 constraintControl = constraintControl and subcat[i][const] == subcat[i+1][const]
 
@@ -264,7 +282,15 @@ class TurkishContextFreeGrammar:
             number = 'Singular'
         return number
 
-    def create_subcategories(self, tense, person, number):
+    def get_case(self, morphemes):
+        case = None
+        if "Dat" in morphemes or "Abl" in morphemes:
+            case = "Dativ"
+        elif "Acc" in morphemes or "Loc" in morphemes:
+            case = "Accusative"
+        return case
+
+    def create_subcategories(self, tense, person, number, case):
         return_dict = {}
         if tense:
             return_dict['tense'] = tense
@@ -272,6 +298,8 @@ class TurkishContextFreeGrammar:
             return_dict['person'] = person
         if number:
             return_dict['number'] = number
+        if case:
+            return_dict['case'] = case
         if return_dict == {}:
             return_dict['other'] = 'other'
         return return_dict
@@ -298,7 +326,8 @@ class TurkishContextFreeGrammar:
             morphemes = p.morphemes
             tense = self.get_tense(morphemes)
             person, number = self.get_person(morphemes)
-            subcats = self.create_subcategories(tense, person, number)
+            case = self.get_case(morphemes)
+            subcats = self.create_subcategories(tense, person, number, case)
 
             # if the token is in the grammar use it, otherwise use info from zeyrek
             var = self.search_terminal(token.lower(), subcats)
@@ -315,10 +344,14 @@ class TurkishContextFreeGrammar:
 
 
     def extract_pos_categories_stemmer(self, token):
-        stem, suffixes = self.stemmer.stem(token)
-        suffixes = self.prepareSuffixCategories(suffixes)
+        categories = self.search_terminal(token, [])
 
-        categories = self.search_terminal(stem, suffixes)
+        if len(categories) == 0:
+            stem, suffixes = self.stemmer.stem(token)
+            suffixes = self.prepareSuffixCategories(suffixes)
+            categories = self.search_terminal(stem, suffixes)
+
+
 
         if len(categories) != 0:
             pos = categories[0][0]

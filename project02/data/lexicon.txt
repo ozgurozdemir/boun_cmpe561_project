@@ -1,4 +1,5 @@
 ve
+kitap
 karanfil
 müsli
 sarmala
@@ -275,7 +276,6 @@ kahvehane
 kramp
 karyola
 otel
-a
 yayıncılık
 sinek
 ok
@@ -370,7 +370,6 @@ gümrük
 arasıra
 aksan
 birara
-besle
 anacık
 armağan
 kokulu
@@ -670,7 +669,6 @@ fikren
 sapık
 ikilem
 maneviyat
-köle
 taife
 maskeli
 gezegen
@@ -983,7 +981,6 @@ kadro
 dul
 kentsel
 korkulu
-ad
 sucu
 naklet
 benzin
@@ -1243,7 +1240,6 @@ zararlı
 horla
 antik
 minare
-el
 saha
 şey
 et
@@ -1325,7 +1321,6 @@ tokat
 öteki
 ağırlık
 demek
-e
 cumhurbaşkanı
 pişir
 misafir
@@ -1530,7 +1525,6 @@ muhtemel
 anay
 fesih
 neler
-oklu
 göksel
 daral
 diseksiyon
@@ -1539,7 +1533,6 @@ gecekondulaş
 kamuoy
 geyik
 kesici
-ev
 karlı
 ihanet
 risotto
@@ -1927,7 +1920,6 @@ ezoterik
 sıcakkanlı
 risk
 dinamizm
-de
 yoğur
 beyaz
 gizemli
@@ -2258,7 +2250,6 @@ nolur
 paralel
 hakem
 eriş
-ek
 han
 sene
 görün
@@ -2335,7 +2326,6 @@ biçim
 ilgili
 işbirliği
 şaşır
-anlatım
 yerinde
 ışık
 dinamitle
@@ -2347,6 +2337,8 @@ kuzin
 mutsuz
 sentetik
 dünya
+oku
+keyifle
 dokunulmazlık
 öksürük
 imge
@@ -2497,7 +2489,6 @@ küreselleş
 nine
 şekşeke
 mürteza
-ağa
 yağlayıcı
 çılgınlık
 monoton
@@ -2894,7 +2885,6 @@ yanlış
 benz
 dizginle
 yokla
-dinlen
 virgül
 temas
 selef
@@ -3108,7 +3098,6 @@ tüketicilik
 hoşnutlu
 başörtü
 tüt
-ey
 takkeli
 ba
 dönüşümlü
@@ -3199,7 +3188,6 @@ sergisi
 sözcülük
 gösterişsiz
 kot
-ovun
 satır
 fırsat
 odun
@@ -3709,7 +3697,6 @@ avare
 kor
 teselli
 tamam
-es
 fiyasko
 tiksin
 cereyan
@@ -3809,7 +3796,6 @@ devlet
 mercek
 bilgisayar
 kutsallık
-ez
 soğukkanlılık
 kapitalist
 caba
@@ -3839,7 +3825,6 @@ afet
 temin
 iktidar
 uğra
-süsle
 müzmin
 sıvazla
 hatırla
@@ -4212,7 +4197,6 @@ silik
 kurallı
 düşün
 gittikçe
-aydın
 yücel
 poz
 fışkır
@@ -4251,7 +4235,6 @@ keklik
 başarısız
 reform
 hindistan
-er
 sabırlı
 şah
 neo
@@ -4559,7 +4542,6 @@ defne
 vesikalık
 istismar
 abluka
-eş
 harap
 sabırsız
 sekel
@@ -4619,7 +4601,6 @@ işaret
 tanrıbilim
 nedensiz
 kamera
-sesli
 kalkın
 modernleş
 liderlik
@@ -4733,7 +4714,6 @@ yansı
 yaklaşım
 yatır
 kremli
-alın
 belge
 greyça
 krampon
@@ -4809,7 +4789,6 @@ boşan
 hal
 gerilla
 zoraki
-en
 apaçık
 bağ
 motivasyon
@@ -4819,7 +4798,6 @@ fırsatçı
 mağara
 komplo
 felsefe
-that
 tartışmalı
 sazlık
 federasyon
@@ -4868,7 +4846,6 @@ enfeksiyon
 köyişleri
 insaf
 ceviz
-adın
 dıştan
 sarhoşluk
 zehirle
@@ -5743,7 +5720,6 @@ güvence
 müdürlük
 asıllı
 sevket
-aldır
 briç
 ajan
 huzursuz
@@ -5821,7 +5797,6 @@ kökenli
 kıyı
 hemşerilik
 muhammedî
-alım
 alabanda
 saksofoncu
 c
@@ -5897,7 +5872,6 @@ aferin
 müfettişlik
 yaş
 parça
-ab
 tutuklu
 çıkar
 yeşil
@@ -5905,10 +5879,8 @@ dönük
 fiziksel
 mantıksız
 tanış
-çk
 ortaokul
 insani
-öd
 kaotik
 zifiri
 kulis
@@ -6492,7 +6464,6 @@ yuvarlak
 arzulu
 arma
 satışlı
-köşe
 başla
 sar
 vesile
@@ -6569,7 +6540,6 @@ tahkim
 sanayici
 doruk
 geometri
-ağar
 hekim
 rehberlik
 psikolojik
@@ -6766,7 +6736,6 @@ sıkın
 sürpriz
 firma
 tara
-adım
 riayet
 kudret
 prodüksiyon
@@ -6936,7 +6905,6 @@ nitekim
 alkış
 liberal
 cinayet
-em
 arala
 birebir
 berber
@@ -7348,7 +7316,6 @@ koko
 eleştiri
 eşsiz
 pembe
-aldan
 sağcı
 numara
 hayvan
@@ -7593,7 +7560,6 @@ zulüm
 goril
 mucize
 bilgili
-d
 depo
 oğul
 yapmışım
@@ -7628,7 +7594,6 @@ köftelik
 ilerici
 dolandırıcılık
 omurilik
-eğ
 şampuanla
 solaryum
 koyacağız
@@ -7643,11 +7608,9 @@ salim
 mal
 evlât
 çeyiz
-altın
 afiyet
 zımni
 istihdam
-cd
 arslan
 böylesine
 selam

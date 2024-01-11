@@ -26,6 +26,7 @@ class TurkishStemmer:
 
         with open(self.lexicon_path, encoding="utf8") as file:
             self.lexicon = file.read().split()
+            self.lexicon = Counter(self.lexicon)
 
         with open(self.corpus_path, encoding="utf8") as file:
             corpus = file.read()
@@ -81,6 +82,11 @@ class TurkishStemmer:
         if token in self.lexicon:
             return token, categories
         elif self.normalize_word(token) in self.lexicon:
+            if token[-1] in "ae":
+                categories.append("Dativ")
+            elif token[-1] in "ıiuü":
+                categories.append("Accusative")
+
             return self.normalize_word(token), categories
 
         # recursion
@@ -131,14 +137,12 @@ class TurkishStemmer:
         letters    = 'abcçdefgğhijklmnoöpqrsştuüvwxyz'
         splits     = [(word[:i], word[i:])    for i in range(len(word) + 1)]
         deletes    = [L + R[1:]               for L, R in splits if R]
-        transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R)>1]
         replaces   = [L + c + R[1:]           for L, R in splits if R for c in letters]
-        inserts    = [L + c + R               for L, R in splits for c in letters]
-        return set(deletes + transposes + replaces + inserts)
+        return set(deletes + replaces)
 
     def normalize_word(self, word: str) -> str:
         E1 = list(self.edits1(word))
-        cands = {var: self.corpus[var] for var in E1}
+        cands = {var: self.lexicon[var] for var in E1}
         cands = {c: cands[c] for c in cands if cands[c] > 0}
         cands = sorted(cands.items(), key=lambda i:i[1], reverse=True)
 

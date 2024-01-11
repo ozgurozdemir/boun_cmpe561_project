@@ -32,7 +32,7 @@ def parse_examples(cfg_object, print_table):
     print("\n")
     cfg_object.parse("Tarihi romanları keyifle okuyorum.", print_table)
     print("\n")
-    cfg_object.parse("Ben dün akşam yemeği için anneme yardım ettim.", print_table)
+    cfg_object.parse("Ben dün akşam yemegi için anneme yardım ettim.", print_table)
     print("\n")
     cfg_object.parse("Destanlar milli kültürümüzü ve tarihimizi anlatır.", print_table)
     print("\n")
@@ -48,6 +48,22 @@ def parse_examples(cfg_object, print_table):
     print("\n")
     cfg_object.parse("Yüksek sesle müzik dinleme.", print_table)
     print("\n")
+
+
+def parse_negative_examples(cfg_object, print_table):
+    cfg_object.parse("Ben arkadaşıma hediye aldın.", print_table)
+    print("\n")
+    cfg_object.parse("Tarihi bir romanlar okudum.", print_table)
+    print("\n")
+    cfg_object.parse("Dün babama yardım edeceğim.", print_table)
+    print("\n")
+    cfg_object.parse("Ben okul gittim.", print_table)
+    print("\n")
+    cfg_object.parse("Ben kitap okundu.", print_table)
+    print("\n")
+    cfg_object.parse("Ben okulda gittim.", print_table)
+    print("\n")
+
 
 
 if __name__ == "__main__":
@@ -69,7 +85,7 @@ if __name__ == "__main__":
         raise Exception("Invalid morphological analyzer strategy")
 
 
-    menu = "\n\t[p]arse single sentence\n\tparse [m]ultiple sentences\n\tparse sentences in the [d]ocument\n\t[h]ide cky table\n\t[e]xit\n>> Selection: "
+    menu = "\n\t[p]arse single sentence\n\tparse [m]ultiple sentences\n\tparse sentences in the [d]ocument\n\tparse [n]egative sentences in the document\n\t[h]ide cky table\n\t[e]xit\n>> Selection: "
     print_table = True
     opt = input(menu)
 
@@ -84,6 +100,9 @@ if __name__ == "__main__":
 
         elif opt == "d":
             parse_examples(turkishCFG, print_table)
+
+        elif opt == "n":
+            parse_negative_examples(turkishCFG, print_table)
 
         elif opt == "h":
             print_table = False
